@@ -3270,6 +3270,7 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
     expected_params = {
       controller: 'downloads',
       action:     'show',
+      format:     'tar',
       id:         '1'
     }
 
