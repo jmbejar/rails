@@ -63,14 +63,13 @@ module ActionDispatch
     private
 
     def render_exception(env, exception)
-      request = Request.new(env)
-
       backtrace_cleaner = env['action_dispatch.backtrace_cleaner']
       wrapper = ExceptionWrapper.new(backtrace_cleaner, exception)
-
       log_error(env, wrapper)
 
       if env['action_dispatch.show_detailed_exceptions']
+        request = Request.new(env)
+
         if @api_only
           render_for_api_application(request, wrapper)
         else
@@ -98,24 +97,27 @@ module ActionDispatch
 
     def render_for_api_application(request, wrapper)
       body = {
-        status:    wrapper.status_code,
-        error:     Rack::Utils::HTTP_STATUS_CODES.fetch(wrapper.status_code, Rack::Utils::HTTP_STATUS_CODES[500]),
+        status: wrapper.status_code,
+        error:  Rack::Utils::HTTP_STATUS_CODES.fetch(
+          wrapper.status_code,
+          Rack::Utils::HTTP_STATUS_CODES[500]
+        ),
         exception: wrapper.exception.inspect,
-        traces:    wrapper.traces
+        traces: wrapper.traces
       }
 
       content_type = request.formats.first
       to_format = "to_#{content_type.to_sym}"
 
       if content_type && body.respond_to?(to_format)
-        body = body.public_send(to_format)
+        formatted_body = body.public_send(to_format)
         format = content_type
       else
-        body = body.to_json
+        formatted_body = body.to_json
         format = Mime::JSON
       end
 
-      render(wrapper.status_code, body, format)
+      render(wrapper.status_code, formatted_body, format)
     end
 
     def create_template(request, wrapper)
