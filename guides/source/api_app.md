@@ -163,12 +163,13 @@ class definition:
 config.api_only = true
 ```
 
-Optionally, in `config/environments/development.rb` add the following line
-to render error responses using the API format (JSON by default) when it
-is a local request:
+By default, error responses are rendered using the API format (JSON by default)
+when it is a local request.
+However, if you prefer to use the standard Rails error HTML page, add the
+following line in `config/environments/development.rb`:
 
 ```ruby
-config.debug_exception_response_format = :api
+config.debug_exception_response_format = :default
 ```
 
 Finally, inside `app/controllers/application_controller.rb`, instead of:
