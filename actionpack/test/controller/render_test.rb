@@ -24,7 +24,25 @@ class TestControllerWithExtraEtags < ActionController::Base
 end
 
 class ImplicitRenderTestController < ActionController::Base
-  def empty_action
+  def implicit_render_no_content
+    # No template exists for any format
+  end
+
+  def implicit_render_with_content
+    # A template for xml format exists, no templates for other formats
+  end
+
+  def implicit_render_no_content_respond_to
+    respond_to do |format|
+      format.xml {}  # template does not exist
+    end
+  end
+
+  def implicit_render_with_content_respond_to
+    respond_to do |format|
+      format.xml {}  # template available (test/implicit_with_respond_to.xml.builder)
+      format.html {} # template does not exist
+    end
   end
 end
 
@@ -477,9 +495,31 @@ end
 class ImplicitRenderTest < ActionController::TestCase
   tests ImplicitRenderTestController
 
-  def test_implicit_no_content_response
-    get :empty_action
+  def test_no_content_response
+    get :implicit_render_no_content
     assert_response :no_content
+  end
+
+  def test_no_content_with_respond_to
+    get :implicit_render_no_content_respond_to, format: 'xml'
+    assert_response :no_content
+  end
+
+  def test_no_content_with_respond_to_with_unsupported_format
+    assert_raises ActionController::UnknownFormat do
+      get :implicit_render_no_content_respond_to, format: 'json'
+    end
+  end
+
+  def test_with_content
+    get :implicit_render_with_content, format: 'xml'
+    assert_response :ok
+  end
+
+  def test_with_content_with_unknown_format
+    assert_raises ActionController::UnknownFormat do
+      get :implicit_render_with_content, format: 'json'
+    end
   end
 end
 

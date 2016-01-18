@@ -132,6 +132,11 @@ module ActionView
       end
       alias :template_exists? :exists?
 
+      def template_exists_in_any_format?(name, prefixes = [], partial = false, keys = [], **options)
+        options_with_all_formats = options.merge(formats: default_formats)
+        @view_paths.exists?(*args_for_lookup(name, prefixes, partial, keys, options_with_all_formats))
+      end
+
       # Adds fallbacks to the view paths. Useful in cases when you are rendering
       # a :file.
       def with_fallbacks

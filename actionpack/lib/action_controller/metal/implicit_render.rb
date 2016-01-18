@@ -21,8 +21,14 @@ module ActionController
         if block_given?
           yield(*args)
         else
-          logger.info "No template found for #{self.class.name}\##{action_name}, rendering head :no_content" if logger
-          super
+          if no_content?
+            logger.info "No template exists for #{self.class.name}\##{action_name}, rendering head :no_content" if logger
+            super
+          else
+            format = request.format.to_sym.upcase if request.format
+            logger.info "No template found for #{self.class.name}\##{action_name} in #{format} format" if logger
+            raise ActionController::UnknownFormat
+          end
         end
       end
     end
@@ -31,6 +37,10 @@ module ActionController
       super || if template_exists?(action_name.to_s, _prefixes)
         "default_render"
       end
+    end
+
+    def no_content?
+      !template_exists_in_any_format?(action_name.to_s, _prefixes, variants: request.variant)
     end
   end
 end

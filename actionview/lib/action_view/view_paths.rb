@@ -10,8 +10,8 @@ module ActionView
       self._view_paths.freeze
     end
 
-    delegate :template_exists?, :view_paths, :formats, :formats=,
-             :locale, :locale=, :to => :lookup_context
+    delegate :template_exists?, :template_exists_in_any_format?, :view_paths,
+             :formats, :formats=, :locale, :locale=, :to => :lookup_context
 
     module ClassMethods
       def _prefixes # :nodoc:
